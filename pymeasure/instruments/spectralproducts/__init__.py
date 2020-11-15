@@ -23,4 +23,4 @@
 # THE SOFTWARE.
 #
 
-from .spectralproducts import SpectralProductsCM110
+from .spectralproductsCM110 import SpectralProductsCM110

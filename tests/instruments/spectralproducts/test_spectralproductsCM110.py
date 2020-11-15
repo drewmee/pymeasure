@@ -29,7 +29,7 @@ from pymeasure.instruments.spectralproducts.spectralproductsCM110 import \
 pytest.skip('Only work with connected hardware', allow_module_level=True)
 
 
-class SpectralProductsCM110:
+class TestSpectralProductsCM110:
     """
     Unit tests for SpectralProductsCM110 class.
 
