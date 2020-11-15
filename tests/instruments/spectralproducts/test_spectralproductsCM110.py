@@ -22,34 +22,19 @@
 # THE SOFTWARE.
 #
 
-from ..errors import RangeError, RangeException
-from .instrument import Instrument
-from .mock import Mock
-from .resources import list_resources
-from .validators import discreteTruncate
+import pytest
+from pymeasure.instruments.spectralproducts.spectralproductsCM110 import \
+    SpectralProductsCM110
 
-from . import advantest
-from . import agilent
-from . import ametek
-from . import ami
-from . import anapico
-from . import anritsu
-from . import attocube
-from . import danfysik
-from . import deltaelektronika
-from . import fwbell
-from . import hp
-from . import keithley
-from . import keysight
-from . import lakeshore
-from . import newport
-from . import ni
-from . import oxfordinstruments
-from . import parker
-from . import razorbill
-from . import signalrecovery
-from . import spectralproducts
-from . import srs
-from . import tektronix
-from . import thorlabs
-from . import yokogawa
+pytest.skip('Only work with connected hardware', allow_module_level=True)
+
+
+class SpectralProductsCM110:
+    """
+    Unit tests for SpectralProductsCM110 class.
+
+    This test suite, needs the following setup to work properly:
+        - A SpectralProductsCM110 device should be powered and connected to the computer
+    """
+    def test_functionality(self):
+        return
