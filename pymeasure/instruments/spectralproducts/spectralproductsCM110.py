@@ -24,13 +24,32 @@
 
 from pymeasure.instruments import Instrument
 
+from .adapters import SpectralProductsUSBAdapter
+
+
 class SpectralProductsCM110(Instrument):
     """ Represents the Spectral Products CM110 Compact 1/8m Monochromator.
-    """
+    To allow user access to the Spectral Products CM110 in Linux,
+    create the file:
+    :code:`/etc/udev/rules.d/52-spectralproductsCM110.rules`, with contents:
 
-    def __init__(self, resourceName, **kwargs):
-        super().__init__(
-            resourceName,
-            "Spectral Products CM110",
-            **kwargs
+    .. code-block:: none
+
+        SUBSYSTEM=="tty",ATTRS{idVendor}=="0403",ATTRS{idProduct}=="6001",SYMLINK+="spectralproductsCM110"
+
+    Then reload the udev rules with:
+
+    .. code-block:: bash
+
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger
+
+    The device will be accessible through :code:`/dev/spectralproductsCM110`.
+    """
+    def __init__(self, port):
+        super(SpectralProductsCM110, self).__init__(
+            SpectralProductsUSBAdapter(port),
+            "Spectral Products CM110 Compact 1/8m Monochromator",
         )
+
+
