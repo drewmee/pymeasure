@@ -39,6 +39,7 @@ Instruments by manufacturer:
    parker/index
    razorbill/index
    signalrecovery/index
+   spectralproducts/index
    srs/index
    tektronix/index
    thorlabs/index
