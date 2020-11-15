@@ -1,4 +1,3 @@
-
 #
 # This file is part of the PyMeasure package.
 #
@@ -23,5 +22,33 @@
 # THE SOFTWARE.
 #
 
-from .adapters import SpectralProductsUSBAdapter
-from .spectralproductsCM110 import SpectralProductsCM110
+from pymeasure.adapters import SerialAdapter
+
+
+class SpectralProductsUSBAdapter(SerialAdapter):
+    """ Provides a :class:`SerialAdapter` with the specific baudrate,
+    timeout, parity, and byte size for Spectral Products USB communication.
+
+    Initiates the adapter to open serial communcation over
+    the supplied port.
+
+    :param port: A string representing the serial port
+    """
+
+    def __init__(self, port):
+        super(SpectralProductsUSBAdapter, self).__init__(
+            port,
+            baudrate=57600,
+            timeout=0.5,
+            parity='O',
+            bytesize=7
+        )
+
+    def write(self, command):
+        """ Overwrites the :func:`SerialAdapter.write <pymeasure.adapters.SerialAdapter.write>`
+        method to automatically append a Unix-style linebreak at the end
+        of the command.
+
+        :param command: SCPI command string to be sent to the instrument
+        """
+        super(SpectralProductsUSBAdapter, self).write(command + "\n")
