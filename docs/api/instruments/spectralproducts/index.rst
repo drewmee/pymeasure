@@ -9,4 +9,5 @@ This section contains specific documentation on the Spectral Products instrument
 .. toctree::
    :maxdepth: 2
 
+   adapters
    spectralproductsCM110
