@@ -38,10 +38,12 @@ class SpectralProductsUSBAdapter(SerialAdapter):
     def __init__(self, port):
         super(SpectralProductsUSBAdapter, self).__init__(
             port,
-            baudrate=57600,
-            timeout=0.5,
-            parity='O',
-            bytesize=7
+            baudrate=9600,
+            timeout=15,
+            parity='N',
+            bytesize=7,
+            stopbits=1,
+            bytesize=8
         )
 
     def write(self, command):
