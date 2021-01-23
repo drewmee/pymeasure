@@ -26,7 +26,7 @@ from pymeasure.adapters import SerialAdapter
 
 
 class SpectralProductsUSBAdapter(SerialAdapter):
-    """ Provides a :class:`SerialAdapter` with the specific baudrate,
+    """Provides a :class:`SerialAdapter` with the specific baudrate,
     timeout, parity, and byte size for Spectral Products USB communication.
 
     Initiates the adapter to open serial communcation over
@@ -37,17 +37,11 @@ class SpectralProductsUSBAdapter(SerialAdapter):
 
     def __init__(self, port):
         super(SpectralProductsUSBAdapter, self).__init__(
-            port,
-            baudrate=9600,
-            timeout=15,
-            parity='N',
-            bytesize=7,
-            stopbits=1,
-            bytesize=8
+            port, baudrate=9600, timeout=15, parity="N", stopbits=1, bytesize=8
         )
 
     def write(self, command):
-        """ Overwrites the :func:`SerialAdapter.write <pymeasure.adapters.SerialAdapter.write>`
+        """Overwrites the :func:`SerialAdapter.write <pymeasure.adapters.SerialAdapter.write>`
         method to automatically append a Unix-style linebreak at the end
         of the command.
 
