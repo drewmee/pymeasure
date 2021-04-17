@@ -22,11 +22,14 @@
 # THE SOFTWARE.
 #
 
-import pytest
-from pymeasure.instruments.spectralproducts.spectralproductsCM110 import \
-    SpectralProductsCM110
+import time
 
-pytest.skip('Only work with connected hardware', allow_module_level=True)
+import pytest
+from pymeasure.instruments.spectralproducts.spectralproductsCM110 import (
+    SpectralProductsCM110,
+)
+
+# pytest.skip('Only work with connected hardware', allow_module_level=True)
 
 
 class TestSpectralProductsCM110:
@@ -36,5 +39,58 @@ class TestSpectralProductsCM110:
     This test suite, needs the following setup to work properly:
         - A SpectralProductsCM110 device should be powered and connected to the computer
     """
-    def test_functionality(self):
+
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.cm110 = SpectralProductsCM110("/dev/monochrom_usb")
+
+    def test_echo(self):
+        response = self.cm110.echo
+        assert response == 27
+
+    def test_serial_number(self):
+        response = self.cm110.serial_number
+        assert response == 23721
+
+    def test_grooves(self):
         return
+
+    def test_blaze(self):
+        return
+
+    def test_number_of_gratings(self):
+        response = self.cm110.number_of_gratings
+        assert response == 1
+
+    def test_reset(self):
+        self.cm110.reset()
+        time.sleep(10)
+        assert self.cm110.wavelength == 0
+
+    def test_wavelength(self):
+        self.cm110.wavelength = 0
+        assert self.cm110.wavelength == 0
+
+        self.cm110.wavelength = 1
+        assert self.cm110.wavelength == 1
+
+    def test_wavelength_units(self):
+        response = self.cm110.wavelength_units
+        assert response == "Nanometers"
+
+    def test_scan_speed(self):
+        return
+        self.cm110.scan_speed = somevalue
+        assert self.cm110.scan_speed == somevalue
+
+    def test_step_size(self):
+        return
+
+    def test_scan(self):
+        return
+
+    """
+    def test_query(self):
+        response = self.cm110.query("4")
+        print(response)
+    """

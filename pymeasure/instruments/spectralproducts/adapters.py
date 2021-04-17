@@ -22,6 +22,9 @@
 # THE SOFTWARE.
 #
 
+import binascii
+import struct
+
 from pymeasure.adapters import SerialAdapter
 
 
@@ -47,4 +50,21 @@ class SpectralProductsUSBAdapter(SerialAdapter):
 
         :param command: SCPI command string to be sent to the instrument
         """
-        super(SpectralProductsUSBAdapter, self).write(command + "\n")
+
+        # encoded_command = struct.pack("B", command)
+        parsed_command = command.split("\t")
+        encoded_command = b"".join([struct.pack("B", int(i)) for i in parsed_command])
+        print(encoded_command)
+        self.connection.write(encoded_command)
+
+    def read(self):
+        # response = self.connection.readline()
+        response = b"".join(self.connection.readlines())
+        print(response)
+        return response
+        decoded_response = [
+            int(binascii.hexlify(i).decode("ascii"), 16) for i in response
+        ]
+        print(decoded_response)
+        print(type(decoded_response))
+        return decoded_response
