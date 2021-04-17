@@ -45,46 +45,71 @@ class TestSpectralProductsCM110:
         self.cm110 = SpectralProductsCM110("/dev/monochrom_usb")
 
     def test_echo(self):
-        response = self.cm110.echo
-        assert response == 27
+        assert self.cm110.echo == 27
 
     def test_serial_number(self):
-        response = self.cm110.serial_number
-        assert response == 23721
-
-    def test_grooves(self):
-        return
-
-    def test_blaze(self):
-        return
-
-    def test_number_of_gratings(self):
-        response = self.cm110.number_of_gratings
-        assert response == 1
+        assert self.cm110.serial_number == 23721
 
     def test_reset(self):
         self.cm110.reset()
-        time.sleep(10)
         assert self.cm110.wavelength == 0
 
-    def test_wavelength(self):
-        self.cm110.wavelength = 0
-        assert self.cm110.wavelength == 0
+    def test_grooves(self):
+        assert self.cm110.grooves == 2400
 
-        self.cm110.wavelength = 1
-        assert self.cm110.wavelength == 1
+    def test_blaze(self):
+        assert self.cm110.blaze
+
+    def test_number_of_gratings(self):
+        assert self.cm110.number_of_gratings == 1
+
+    def test_grating(self):
+        self.cm110.grating = 2
+        assert self.cm110.grating == 2
+
+        self.cm110.grating = 1
+        assert self.cm110.grating == 1
 
     def test_wavelength_units(self):
-        response = self.cm110.wavelength_units
-        assert response == "Nanometers"
+        self.cm110.wavelength_units = "Nanometers"
+        assert self.cm110.wavelength_units == "Nanometers"
 
-    def test_scan_speed(self):
-        return
-        self.cm110.scan_speed = somevalue
-        assert self.cm110.scan_speed == somevalue
+        self.cm110.wavelength_units = "Microns"
+        assert self.cm110.wavelength_units == "Microns"
+
+        self.cm110.wavelength_units = "Angstroms"
+        assert self.cm110.wavelength_units == "Angstroms"
+
+    def test_wavelength(self):
+        if self.cm110.wavelength_units != "Angstroms":
+            self.cm110.wavelength_units = "Angstroms"
+        """
+        for i in range(0, 20, 5):
+            self.cm110.wavelength = i
+            assert self.cm110.wavelength == i
+        """
+
+        self.cm110.reset()
+        assert self.cm110.wavelength == 0
+
+        # self.cm110.wavelength = 0
+        # assert self.cm110.wavelength == 0
+
+        self.cm110.wavelength = 6800
+        assert self.cm110.wavelength == 6800
+
+        self.cm110.wavelength = 7500
+        assert self.cm110.wavelength == 7500
+
+        # Out of range
+        # self.cm110.wavelength = 7510
+        # assert self.cm110.wavelength == 7510
 
     def test_step_size(self):
-        return
+        assert self.cm110.step_size
+
+    def test_scan_speed(self):
+        assert self.cm110.scan_speed
 
     def test_scan(self):
         return
