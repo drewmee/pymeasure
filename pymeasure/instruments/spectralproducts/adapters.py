@@ -24,9 +24,9 @@
 
 import binascii
 import struct
+import time
 
 from pymeasure.adapters import SerialAdapter
-
 
 class SpectralProductsUSBAdapter(SerialAdapter):
     """Provides a :class:`SerialAdapter` with the specific baudrate,
@@ -40,7 +40,7 @@ class SpectralProductsUSBAdapter(SerialAdapter):
 
     def __init__(self, port):
         super(SpectralProductsUSBAdapter, self).__init__(
-            port, baudrate=9600, timeout=15, parity="N", stopbits=1, bytesize=8
+            port, baudrate=9600, timeout=0.1, parity="N", stopbits=1, bytesize=8
         )
 
     def write(self, command):

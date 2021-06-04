@@ -83,6 +83,12 @@ class SpectralProductsCM110(Instrument):
         """ Gets the serial number. """,
         get_process=lambda x: SpectralProductsCM110._process_query_response(x),
     )
+    wavelength = Instrument.measurement(
+        "56\t0",
+        """ Gets the current wavelength setting. """,
+        get_process=lambda x: SpectralProductsCM110._process_query_response(x),
+    )
+    '''
     wavelength = Instrument.control(
         "56\t0",
         "16\t%s\t%s",
@@ -93,6 +99,7 @@ class SpectralProductsCM110(Instrument):
         set_process=lambda x: SpectralProductsCM110._process_wavelength_encoding(x),
         check_set_errors=True,
     )
+    '''
     wavelength_units = Instrument.control(
         "56\t14",
         "50\t%d",
@@ -108,6 +115,12 @@ class SpectralProductsCM110(Instrument):
         """ Get the number of gratings installed in the device. """,
         get_process=lambda x: SpectralProductsCM110._process_query_response(x),
     )
+    grating = Instrument.measurement(
+        "56\t4",
+        """ Gets the current grating selection. """,
+        get_process=lambda x: SpectralProductsCM110._process_query_response(x),
+    )
+    '''
     grating = Instrument.control(
         "56\t4",
         "26\t%s",
@@ -117,6 +130,7 @@ class SpectralProductsCM110(Instrument):
         values=[1, 2],
         check_set_errors=True,
     )
+    '''
     grooves = Instrument.measurement(
         "56\t2",
         """ Gets the grooves/mm of the current grating. """,
@@ -138,7 +152,7 @@ class SpectralProductsCM110(Instrument):
         get_process=lambda x: SpectralProductsCM110._process_query_response(x),
     )
 
-    def __init__(self, port, clear_buffer=True, grating_ruling=2400):
+    def __init__(self, port, clear_buffer=True):
         super(SpectralProductsCM110, self).__init__(
             SpectralProductsUSBAdapter(port),
             "Spectral Products CM110 Compact 1/8m Monochromator",
@@ -148,11 +162,8 @@ class SpectralProductsCM110(Instrument):
             # self.adapter.connection.reset_input_buffer()
             # self.adapter.connection.reset_output_buffer()
 
-        self.grating_ruling = grating_ruling
+        #self.grating_ruling = grating_ruling
         # Current grating installed: AG2400-00240-303
-        # Grating needed: AG1200-00400-303
-        # https://www.spectralproducts.com/DK_Gratings/1870
-        # https://www.spectralproducts.com/pdf/CM110%20_USER_MANUAL_2014_rev.A.pdf
 
     def check_errors(self):
         response = self.read()
@@ -171,7 +182,26 @@ class SpectralProductsCM110(Instrument):
         decoded_msg = SpectralProductsCM110._process_query_response(response)
         return decoded_msg
 
+    def select_wavelength(self, wavelength, delay=None):
+        # TODO perform validation of wavelength input...
+        # This will be grating dependent...
+        wavelength_encoding = SpectralProductsCM110._process_wavelength_encoding(wavelength)
+        self.write("16\t%s\t%s" % wavelength_encoding)
+        if delay is not None:
+            time.sleep(delay)
+        self.check_errors()
+
+    def select_grating(self, grating_number):
+        grating_numbers = [1,2]
+        if grating_number not in grating_numbers:
+            raise ValueError('Value of {} is not in the discrete set {}'.format(
+                grating_number, grating_numbers
+            ))
+        self.write("26\t%d" % grating_number)
+        time.sleep(30)
+        self.check_errors()
+
     def reset(self):
         self.write("255\t255\t255")
-        time.sleep(10)
+        time.sleep(30)
         self.read()

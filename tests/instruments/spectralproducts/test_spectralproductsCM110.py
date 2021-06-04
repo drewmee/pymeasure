@@ -61,14 +61,12 @@ class TestSpectralProductsCM110:
         assert self.cm110.blaze
 
     def test_number_of_gratings(self):
-        assert self.cm110.number_of_gratings == 1
+        assert self.cm110.number_of_gratings == 2
 
     def test_grating(self):
-        self.cm110.grating = 2
-        assert self.cm110.grating == 2
-
-        self.cm110.grating = 1
-        assert self.cm110.grating == 1
+        for grating_number in [1,2]:
+            self.cm110.select_grating(grating_number)
+            assert self.cm110.grating == grating_number
 
     def test_wavelength_units(self):
         self.cm110.wavelength_units = "Nanometers"
@@ -83,23 +81,27 @@ class TestSpectralProductsCM110:
     def test_wavelength(self):
         if self.cm110.wavelength_units != "Angstroms":
             self.cm110.wavelength_units = "Angstroms"
-        """
-        for i in range(0, 20, 5):
-            self.cm110.wavelength = i
-            assert self.cm110.wavelength == i
-        """
 
-        self.cm110.reset()
+        if self.cm110.wavelength != 0:
+            self.cm110.reset()
+        
+        if self.cm110.grating != 1:
+            self.cm110.select_grating(1)
+        
         assert self.cm110.wavelength == 0
 
-        # self.cm110.wavelength = 0
-        # assert self.cm110.wavelength == 0
+        for i in range(0, 6800, 1000):
+            self.cm110.select_wavelength(i, delay=0.5)
+            assert self.cm110.wavelength == i
 
-        self.cm110.wavelength = 6800
-        assert self.cm110.wavelength == 6800
+        self.cm110.select_wavelength(0, delay=5)
+        assert self.cm110.wavelength == 0
 
-        self.cm110.wavelength = 7500
+        self.cm110.select_wavelength(7500, delay=5)
         assert self.cm110.wavelength == 7500
+
+        self.cm110.select_wavelength(0, delay=5)
+        assert self.cm110.wavelength == 0
 
         # Out of range
         # self.cm110.wavelength = 7510
