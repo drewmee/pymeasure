@@ -53,8 +53,7 @@ class SpectralProductsCM110(Instrument):
 
     @staticmethod
     def _process_query_response(r):
-        if isinstance(r, str):
-            r = ast.literal_eval(r)
+        r = bytes.fromhex(ast.literal_eval(r)[0])
 
         response_bytearray = [i for i in bytearray(r)]
         high_byte = binascii.hexlify(struct.pack("B", response_bytearray[0]))
@@ -73,22 +72,22 @@ class SpectralProductsCM110(Instrument):
     def _process_wavelength_encoding(wl):
         return tuple(i for i in bytearray(struct.pack(">H", wl)))
 
+    def _process_echo(r):
+        r_hex = bytes.fromhex(ast.literal_eval(r)[0])
+        return int(binascii.hexlify(r_hex), 16)
+
+    '''
     echo = Instrument.measurement(
         "27",
         """ Verifies communications with the device. """,
-        get_process=lambda x: int(binascii.hexlify(ast.literal_eval(x)), 16),
+        get_process=lambda x: SpectralProductsCM110._process_echo(x),
     )
+    '''
     serial_number = Instrument.measurement(
         "56\t19",
         """ Gets the serial number. """,
         get_process=lambda x: SpectralProductsCM110._process_query_response(x),
     )
-    wavelength = Instrument.measurement(
-        "56\t0",
-        """ Gets the current wavelength setting. """,
-        get_process=lambda x: SpectralProductsCM110._process_query_response(x),
-    )
-    '''
     wavelength = Instrument.control(
         "56\t0",
         "16\t%s\t%s",
@@ -99,7 +98,6 @@ class SpectralProductsCM110(Instrument):
         set_process=lambda x: SpectralProductsCM110._process_wavelength_encoding(x),
         check_set_errors=True,
     )
-    '''
     wavelength_units = Instrument.control(
         "56\t14",
         "50\t%d",
@@ -115,12 +113,6 @@ class SpectralProductsCM110(Instrument):
         """ Get the number of gratings installed in the device. """,
         get_process=lambda x: SpectralProductsCM110._process_query_response(x),
     )
-    grating = Instrument.measurement(
-        "56\t4",
-        """ Gets the current grating selection. """,
-        get_process=lambda x: SpectralProductsCM110._process_query_response(x),
-    )
-    '''
     grating = Instrument.control(
         "56\t4",
         "26\t%s",
@@ -130,7 +122,6 @@ class SpectralProductsCM110(Instrument):
         values=[1, 2],
         check_set_errors=True,
     )
-    '''
     grooves = Instrument.measurement(
         "56\t2",
         """ Gets the grooves/mm of the current grating. """,
@@ -159,17 +150,19 @@ class SpectralProductsCM110(Instrument):
         )
         if clear_buffer:
             self.adapter.connection.flush()
-            # self.adapter.connection.reset_input_buffer()
-            # self.adapter.connection.reset_output_buffer()
+            self.adapter.connection.reset_input_buffer()
+            self.adapter.connection.reset_output_buffer()
 
         #self.grating_ruling = grating_ruling
         # Current grating installed: AG2400-00240-303
 
     def check_errors(self):
-        response = self.read()
-        response_bytearray = [i for i in bytearray(response)]
+        r = self.read()
+        r = bytes.fromhex(r[0])
+        response_bytearray = [i for i in bytearray(r)]
         status_byte = response_bytearray[-2]
         end_byte = response_bytearray[-1]
+        
         if status_byte >= 128:
             raise Exception("Incorrect status byte received.")
         if end_byte != 24:
@@ -182,26 +175,23 @@ class SpectralProductsCM110(Instrument):
         decoded_msg = SpectralProductsCM110._process_query_response(response)
         return decoded_msg
 
-    def select_wavelength(self, wavelength, delay=None):
-        # TODO perform validation of wavelength input...
-        # This will be grating dependent...
-        wavelength_encoding = SpectralProductsCM110._process_wavelength_encoding(wavelength)
-        self.write("16\t%s\t%s" % wavelength_encoding)
-        if delay is not None:
-            time.sleep(delay)
-        self.check_errors()
-
-    def select_grating(self, grating_number):
-        grating_numbers = [1,2]
-        if grating_number not in grating_numbers:
-            raise ValueError('Value of {} is not in the discrete set {}'.format(
-                grating_number, grating_numbers
-            ))
-        self.write("26\t%d" % grating_number)
-        time.sleep(30)
-        self.check_errors()
-
-    def reset(self):
+    def reset(self, delay=30):
         self.write("255\t255\t255")
-        time.sleep(30)
-        self.read()
+        time.sleep(delay)
+        
+        self.adapter.connection.flush()
+        self.adapter.connection.reset_input_buffer()
+        self.adapter.connection.reset_output_buffer()
+
+
+    def echo(self):
+        self.write("27")
+        
+        r = self.adapter.read_echo()
+        r = bytes.fromhex(r[0])
+        r = bytearray(r)[0]
+        
+        if r != 27:
+            raise Exception("Incorrect echo byte received.")
+        
+        return r

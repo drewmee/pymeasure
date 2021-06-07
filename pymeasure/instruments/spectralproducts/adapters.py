@@ -25,7 +25,7 @@
 import binascii
 import struct
 import time
-
+from serial import SerialTimeoutException
 from pymeasure.adapters import SerialAdapter
 
 class SpectralProductsUSBAdapter(SerialAdapter):
@@ -40,7 +40,7 @@ class SpectralProductsUSBAdapter(SerialAdapter):
 
     def __init__(self, port):
         super(SpectralProductsUSBAdapter, self).__init__(
-            port, baudrate=9600, timeout=0.1, parity="N", stopbits=1, bytesize=8
+            port, baudrate=9600, timeout=30, parity="N", stopbits=1, bytesize=8
         )
 
     def write(self, command):
@@ -57,6 +57,19 @@ class SpectralProductsUSBAdapter(SerialAdapter):
         self.connection.write(encoded_command)
 
     def read(self):
-        # response = self.connection.readline()
-        response = b"".join(self.connection.readlines())
-        return response
+        lf = struct.pack("B", 24)
+        r = self.connection.read_until(lf)
+
+        if not r:
+            raise SerialTimeoutException("read_until() timed out.")
+        
+        return [r.hex()]
+
+    def read_echo(self):
+        lf = struct.pack("B", 27)
+        r = self.connection.read_until(lf)
+        
+        if not r:
+            raise SerialTimeoutException("read_until() timed out.")
+        
+        return [r.hex()]

@@ -44,8 +44,48 @@ class TestSpectralProductsCM110:
     def setup(self):
         self.cm110 = SpectralProductsCM110("/dev/monochrom_usb")
 
+    '''
+    def test_tmp(self):
+        
+        for grating in [1,2]:
+            flag = 0
+            
+            self.cm110.grating = grating
+            print("GRATING:", self.cm110.grating)
+            
+            self.cm110.wavelength = 0
+            print("WAVELENGTH:", self.cm110.wavelength)
+
+            #for j, i in enumerate(range(320, 720+10, 2)):
+            for j, i in enumerate(range(180, 680, 10)):
+                print(j,i)
+                self.cm110.wavelength = i
+                time.sleep(0.1)
+                wl = self.cm110.wavelength
+                try:
+                    assert wl == i
+                except:
+                    print("WTF",i,wl)
+                    if not flag:
+                        self.cm110.adapter.connection.flush()
+                        self.cm110.adapter.connection.reset_input_buffer()
+                        self.cm110.adapter.connection.reset_output_buffer()
+                        self.cm110.reset()
+                        flag = 1
+        return
+
+        for j in range(5):
+            for i in [i for i in range(350, 720+20, 20)]:
+                self.cm110.wavelength = i
+                time.sleep(0.1)
+                wl = self.cm110.wavelength
+                try:
+                    assert wl == i
+                except:
+                    print("WTF",i,wl)
+    '''
     def test_echo(self):
-        assert self.cm110.echo == 27
+        assert self.cm110.echo() == 27
 
     def test_serial_number(self):
         assert self.cm110.serial_number == 23721
@@ -54,19 +94,23 @@ class TestSpectralProductsCM110:
         self.cm110.reset()
         assert self.cm110.wavelength == 0
 
-    def test_grooves(self):
-        assert self.cm110.grooves == 2400
-
-    def test_blaze(self):
-        assert self.cm110.blaze
-
     def test_number_of_gratings(self):
         assert self.cm110.number_of_gratings == 2
 
     def test_grating(self):
         for grating_number in [1,2]:
-            self.cm110.select_grating(grating_number)
+            self.cm110.grating = grating_number
             assert self.cm110.grating == grating_number
+
+    def test_grooves(self):
+        self.cm110.grating = 1
+        assert self.cm110.grooves == 2400
+
+        self.cm110.grating = 2
+        assert self.cm110.grooves == 300
+
+    def test_blaze(self):
+        assert self.cm110.blaze
 
     def test_wavelength_units(self):
         self.cm110.wavelength_units = "Nanometers"
@@ -78,34 +122,21 @@ class TestSpectralProductsCM110:
         self.cm110.wavelength_units = "Angstroms"
         assert self.cm110.wavelength_units == "Angstroms"
 
-    def test_wavelength(self):
-        if self.cm110.wavelength_units != "Angstroms":
-            self.cm110.wavelength_units = "Angstroms"
+    def test_gratings_and_wavelengths(self):
+        if self.cm110.wavelength_units != "Nanometers":
+            self.cm110.wavelength_units = "Nanometers"
 
         if self.cm110.wavelength != 0:
             self.cm110.reset()
-        
-        if self.cm110.grating != 1:
-            self.cm110.select_grating(1)
-        
-        assert self.cm110.wavelength == 0
 
-        for i in range(0, 6800, 1000):
-            self.cm110.select_wavelength(i, delay=0.5)
-            assert self.cm110.wavelength == i
-
-        self.cm110.select_wavelength(0, delay=5)
-        assert self.cm110.wavelength == 0
-
-        self.cm110.select_wavelength(7500, delay=5)
-        assert self.cm110.wavelength == 7500
-
-        self.cm110.select_wavelength(0, delay=5)
-        assert self.cm110.wavelength == 0
-
-        # Out of range
-        # self.cm110.wavelength = 7510
-        # assert self.cm110.wavelength == 7510
+        for grating_number in [1,2]:
+            self.cm110.grating = grating_number
+            assert self.cm110.grating == grating_number
+            
+            for wl in range(320, 730, 5):
+                self.cm110.wavelength = wl
+                time.sleep(0.1)
+                assert self.cm110.wavelength == wl
 
     def test_step_size(self):
         assert self.cm110.step_size
